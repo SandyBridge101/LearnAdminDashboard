@@ -37,16 +37,23 @@ export default function Learners() {
   const [search, setSearch] = useState("");
   const [trackFilter, setTrackFilter] = useState<string>("all");
   const [selectedLearner, setSelectedLearner] = useState<Learner | null>(null);
+  const [showModal, setShowModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: learners = [], isLoading } = useQuery({
-    queryKey: ["/api/learners", search, trackFilter === "all" ? undefined : trackFilter],
+  const { data: learnersRaw = [], isLoading } = useQuery({
+    queryKey: ["/api/learners", search], //queryKey: ["/api/learners", search, trackFilter === "all" ? undefined : trackFilter],
   });
 
+  
   const { data: tracks = [] } = useQuery({
     queryKey: ["/api/tracks"],
   });
+
+  
+  console.log("learnersRaw",learnersRaw);
+
+  const learners = Array.isArray(learnersRaw) ? learnersRaw : [];
 
   const deleteLearnerMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/learners/${id}`),
@@ -65,6 +72,21 @@ export default function Learners() {
       });
     },
   });
+
+  const handleAddLearner = () => {
+    setSelectedLearner(null);
+    setShowModal(true);
+  };
+
+  const handleViewLearner = () => {
+    setSelectedLearner(null);
+    setShowModal(true);
+  };
+
+  const handleEditLearner = (learner: Learner) => {
+      setSelectedLearner(learner);
+      setShowModal(true);
+  };
 
   const handleDeleteLearner = (id: number, name: string) => {
     if (confirm(`Are you sure you want to delete ${name}?`)) {
@@ -105,12 +127,18 @@ export default function Learners() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button className="btn-primary">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Learner
-        </Button>
-      </div>
+      {/*
+        <div className="flex items-center justify-between">
+          <Button 
+          className="btn-primary"
+          onClick={() => handleAddLearner()}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Learner
+          </Button>
+        </div>
+      */}
+
 
       <Card>
         <CardContent className="p-6">
@@ -156,10 +184,9 @@ export default function Learners() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Learner</TableHead>
-                  <TableHead>Track</TableHead>
-                  <TableHead>Date Joined</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
                   <TableHead>Amount Paid</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -177,23 +204,22 @@ export default function Learners() {
                         <div className="flex items-center">
                           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                             <span className="text-blue-600 font-medium">
-                              {learner.firstName[0]}{learner.lastName[0]}
+                              {learner.first_name[0]}{learner.last_name[0]}
                             </span>
                           </div>
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {learner.firstName} {learner.lastName}
+                              {learner.first_name} {learner.last_name}
                             </div>
-                            <div className="text-sm text-gray-500">{learner.email}</div>
+                            {/*<div className="text-sm text-gray-500">{learner.email}</div>*/}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{getTrackName(learner.trackId)}</TableCell>
+                      <TableCell>{learner.email}</TableCell>{/*<TableCell>{getTrackName(learner.email)}</TableCell>*/}
                       <TableCell>
-                        {learner.dateJoined ? new Date(learner.dateJoined).toLocaleDateString() : "N/A"}
+                        {learner.contact ? learner.contact : "N/A"}
                       </TableCell>
                       <TableCell>${parseFloat(learner.amountPaid || "0").toFixed(2)}</TableCell>
-                      <TableCell>{getStatusBadge(learner.status || "active")}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Button
@@ -204,21 +230,25 @@ export default function Learners() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
+                          {/*
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-green-600 hover:text-green-900"
+                            onClick={() => handleEditLearner(learner)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
+                          
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDeleteLearner(learner.id, `${learner.firstName} ${learner.lastName}`)}
+                            onClick={() => handleDeleteLearner(learner.id, `${learner.first_name} ${learner.last_name}`)}
                             className="h-8 w-8 text-red-600 hover:text-red-900"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
+                          */}
                         </div>
                       </TableCell>
                     </TableRow>

@@ -31,15 +31,12 @@ export function CourseFormModal({ course, tracks, onClose, onSuccess }: CourseFo
   const isEdit = !!course;
 
   const form = useForm<InsertCourse>({
-    resolver: zodResolver(insertCourseSchema),
+    //resolver: zodResolver(insertCourseSchema),
     defaultValues: {
       title: course?.title || "",
       description: course?.description || "",
       trackId: course?.trackId || 0,
-      instructor: course?.instructor || "",
-      duration: course?.duration || "",
-      status: course?.status || "active",
-      technologies: course?.technologies || [],
+      image: course?.image || "",
     },
   });
 
@@ -107,8 +104,13 @@ export function CourseFormModal({ course, tracks, onClose, onSuccess }: CourseFo
           <div>
             <Label htmlFor="trackId">Track</Label>
             <Select
-              value={form.watch("trackId")?.toString()}
-              onValueChange={(value) => form.setValue("trackId", parseInt(value))}
+              value={form.watch("trackId") !== null 
+                ? form.watch("trackId")?.toString() 
+                : "none"
+              }
+              onValueChange={(value) =>
+                form.setValue("trackId", value === "none" ? "" : value)
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a track" />
@@ -127,53 +129,15 @@ export function CourseFormModal({ course, tracks, onClose, onSuccess }: CourseFo
           </div>
 
           <div>
-            <Label htmlFor="instructor">Instructor</Label>
+            <Label htmlFor="image">Image</Label>
             <Input
-              id="instructor"
-              placeholder="Instructor name"
-              {...form.register("instructor")}
+              id="image"
+              placeholder="Image Url"
+              {...form.register("image")}
             />
             {form.formState.errors.instructor && (
               <p className="text-red-500 text-sm mt-1">{form.formState.errors.instructor.message}</p>
             )}
-          </div>
-
-          <div>
-            <Label htmlFor="duration">Duration</Label>
-            <Input
-              id="duration"
-              placeholder="e.g., 4 weeks"
-              {...form.register("duration")}
-            />
-            {form.formState.errors.duration && (
-              <p className="text-red-500 text-sm mt-1">{form.formState.errors.duration.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={form.watch("status")}
-              onValueChange={(value) => form.setValue("status", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="technologies">Technologies (comma-separated)</Label>
-            <Input
-              id="technologies"
-              placeholder="e.g., JavaScript, React, HTML"
-              defaultValue={course?.technologies?.join(', ') || ''}
-            />
           </div>
 
           <div>

@@ -45,11 +45,11 @@ export function LearnerDetailsModal({ learner, tracks, onClose }: LearnerDetails
           <div className="text-center">
             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-blue-600 font-semibold text-2xl">
-                {learner.firstName[0]}{learner.lastName[0]}
+                {learner.first_name[0]}{learner.last_name[0]}
               </span>
             </div>
             <h4 className="text-lg font-semibold text-gray-800">
-              {learner.firstName} {learner.lastName}
+              {learner.first_name} {learner.last_name}
             </h4>
             <p className="text-gray-600">{learner.email}</p>
             <div className="mt-2">
@@ -58,14 +58,17 @@ export function LearnerDetailsModal({ learner, tracks, onClose }: LearnerDetails
           </div>
 
           {/* Details Section */}
+          
           <div className="space-y-4">
+            {/*
             <div className="flex justify-between items-center py-2 border-b border-gray-100">
               <span className="text-gray-600 flex items-center">
                 <User className="w-4 h-4 mr-2" />
                 Track
               </span>
-              <span className="font-medium text-gray-800">{getTrackName(learner.trackId)}</span>
+              <span className="font-medium text-gray-800">{getTrackName(learner.track)}</span>
             </div>
+            
 
             {learner.gender && (
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
@@ -73,14 +76,15 @@ export function LearnerDetailsModal({ learner, tracks, onClose }: LearnerDetails
                 <span className="font-medium text-gray-800">{learner.gender}</span>
               </div>
             )}
+            */}
 
-            {learner.phone && (
+            {learner.contact && (
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-600 flex items-center">
                   <Phone className="w-4 h-4 mr-2" />
                   Contact
                 </span>
-                <span className="font-medium text-gray-800">{learner.phone}</span>
+                <span className="font-medium text-gray-800">{learner.contact}</span>
               </div>
             )}
 

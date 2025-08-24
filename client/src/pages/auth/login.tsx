@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { loginSchema, type LoginData } from "@shared/schema";
 import { Eye, EyeOff, GraduationCap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,9 +19,10 @@ export default function Login() {
   const { login } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  //const navigate = useNavigate();
 
   const form = useForm<LoginData>({
-    resolver: zodResolver(loginSchema),
+    //resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -31,11 +33,21 @@ export default function Login() {
     setIsLoading(true);
     try {
       await login(data.email, data.password);
+      setLocation("/dashboard");
       toast({
         title: "Login successful",
         description: "Welcome back to CClient Admin Dashboard",
       });
-      setLocation("/dashboard");
+      /*
+      navigate("/dashboard", {
+        state: {
+          userId: "12345",
+          userName: "Tariq",
+        },
+      });
+      */
+      //window.location.href = '/dashboard';
+      
     } catch (error: any) {
       toast({
         title: "Login failed",

@@ -22,10 +22,10 @@ export default function OTPVerification() {
 
   // Get email from URL params
   const urlParams = new URLSearchParams(location.split('?')[1] || '');
-  const email = urlParams.get('email') || '';
+  const email = urlParams.get('email') || 'tariqnassiru@gmail.com';
 
   const form = useForm<OTPVerificationData>({
-    resolver: zodResolver(otpVerificationSchema),
+    //resolver: zodResolver(otpVerificationSchema),
     defaultValues: {
       email,
       otpCode: "",
@@ -69,13 +69,14 @@ export default function OTPVerification() {
   const verifyOtpMutation = useMutation({
     mutationFn: authApi.verifyOTP,
     onSuccess: (data) => {
-      setStoredToken(data.token);
-      setAdmin(data.admin);
+      //setStoredToken(data.token);
+      //setAdmin(data.admin);
+      setLocation("/dashboard");
       toast({
         title: "Account verified successfully",
         description: "Welcome to CClient Admin Dashboard",
       });
-      setLocation("/dashboard");
+      
     },
     onError: (error: any) => {
       toast({
@@ -110,6 +111,7 @@ export default function OTPVerification() {
   });
 
   const onSubmit = (data: OTPVerificationData) => {
+    verifyOtpMutation.mutate(data);
     if (data.otpCode.length !== 6) {
       toast({
         title: "Invalid OTP",
@@ -118,7 +120,7 @@ export default function OTPVerification() {
       });
       return;
     }
-    verifyOtpMutation.mutate(data);
+    
   };
 
   const formatTime = (seconds: number) => {
@@ -127,6 +129,7 @@ export default function OTPVerification() {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  /*
   if (!email) {
     return (
       <div className="min-h-screen auth-gradient flex items-center justify-center p-4">
@@ -141,6 +144,7 @@ export default function OTPVerification() {
       </div>
     );
   }
+  */
 
   return (
     <div className="min-h-screen auth-gradient flex items-center justify-center p-4">
@@ -194,8 +198,8 @@ export default function OTPVerification() {
             <Button
               type="submit"
               className="w-full btn-primary"
-              disabled={verifyOtpMutation.isPending || otpValues.join('').length !== 6}
-            >
+              disabled={verifyOtpMutation.isPending || otpValues.join('').length !== 6}>
+
               {verifyOtpMutation.isPending ? "Verifying..." : "Verify Code"}
             </Button>
 

@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { 
   Users, 
   DollarSign, 
@@ -13,11 +15,42 @@ import {
   ArrowUp,
   CircleAlert
 } from "lucide-react";
+import { learners } from "@shared/schema";
 
 export default function Dashboard() {
-  const { data: stats, isLoading } = useQuery({
+  const [, setLocation] = useLocation();
+  const { data: stats, } = useQuery({
     queryKey: ["/api/dashboard/stats"],
   });
+  const { data: learnersRaw = [], isLoading } = useQuery({
+    queryKey: ["/api/learners"], //queryKey: ["/api/learners", search, trackFilter === "all" ? undefined : trackFilter],
+  });
+  const { data: invoicesRaw = [], } = useQuery({
+    queryKey: ["/api/invoices",],
+  });
+    const { data: coursesRaw = [] } = useQuery({
+    queryKey: ["/api/courses"], //queryKey: ["/api/courses", search, trackFilter === "all" ? undefined : trackFilter],
+  });
+
+  console.log("invoicesRaw",invoicesRaw);
+
+  const invoices = Array.isArray(invoicesRaw) ? invoicesRaw : [];
+  const learners = Array.isArray(learnersRaw) ? learnersRaw : [];
+  const courses = Array.isArray(coursesRaw) ? coursesRaw : [];
+
+  const { totalAmount, pendingCount } = invoices.reduce(
+    (acc, invoice) => {
+      acc.totalAmount += Number(invoice.amount) || 0; // ensure numeric
+      if (invoice.status === "pending") {
+        acc.pendingCount += 1;
+      }
+      return acc;
+    },
+    { totalAmount: 0, pendingCount: 0 }
+  );
+
+  
+  
 
   if (isLoading) {
     return (
@@ -33,12 +66,21 @@ export default function Dashboard() {
     );
   }
 
-  const statsData = stats || {
-    totalLearners: 0,
-    totalRevenue: 0,
-    activeCourses: 0,
-    pendingInvoices: 0,
+  
+
+  const statsData = {
+    totalLearners: learners.length,
+    totalRevenue: totalAmount,
+    activeCourses: courses.length,
+    pendingInvoices: pendingCount,
   };
+
+  const data = invoices.map((invoice, index) => ({
+    id: `Invoice ${index + 1}`, // use a friendly label instead of UUID
+    amount: Number(invoice.amount),
+  }));
+
+  console.log("Chart Data",data);
 
   return (
     <div className="space-y-6">
@@ -109,8 +151,9 @@ export default function Dashboard() {
         </div>
       </div>
 
+      
       {/* Charts and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex items-center justify-center">
         {/* Revenue Chart */}
         <Card>
           <CardContent className="p-6">
@@ -123,15 +166,33 @@ export default function Dashboard() {
               </select>
             </div>
             <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+              {/*
               <div className="text-center">
                 <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-2" />
                 <p className="text-gray-500">Revenue chart will be displayed here</p>
               </div>
+              */}
+
+              {/* Chart Section */}
+              <div className="h-64">
+                <ResponsiveContainer width="100%" aspect={3}>
+                  <LineChart width={500} height={300} data={data}>
+                    <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
+                    <XAxis dataKey="id"/>
+                    <YAxis/>
+                    <Line type="monotone" dataKey="amount" stroke="#8884d8" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+
             </div>
           </CardContent>
         </Card>
+        
 
         {/* Recent Activity */}
+        {/*
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-6">Recent Activity</h3>
@@ -182,50 +243,58 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+        */}
       </div>
+      
 
       {/* Quick Actions */}
       <Card>
         <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-6">Quick Actions</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-6">Actions</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Button
               variant="outline"
               className="p-4 h-auto border-2 border-dashed border-blue-300 hover:bg-blue-50 transition-colors group"
+              onClick={() => setLocation(`/learners`)}
             >
               <div className="text-center">
                 <UserPlus className="w-8 h-8 text-blue-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <p className="text-sm font-medium text-gray-800">Add New Learner</p>
+                <p className="text-sm font-medium text-gray-800">Manage Learners</p>
+                <Link href="/Learners" className="text-blue-600 hover:text-blue-800 font-medium"></Link>
               </div>
             </Button>
 
             <Button
               variant="outline"
               className="p-4 h-auto border-2 border-dashed border-green-300 hover:bg-green-50 transition-colors group"
+              onClick={() => setLocation(`/courses`)}
             >
               <div className="text-center">
                 <BookOpen className="w-8 h-8 text-green-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <p className="text-sm font-medium text-gray-800">Create Course</p>
+                <p className="text-sm font-medium text-gray-800">Manage Courses</p>
               </div>
             </Button>
 
             <Button
               variant="outline"
               className="p-4 h-auto border-2 border-dashed border-purple-300 hover:bg-purple-50 transition-colors group"
+              onClick={() => setLocation(`/tracks`)}
             >
               <div className="text-center">
                 <Route className="w-8 h-8 text-purple-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <p className="text-sm font-medium text-gray-800">Add New Track</p>
+                <p className="text-sm font-medium text-gray-800">Manage Tracks</p>
               </div>
             </Button>
 
             <Button
               variant="outline"
               className="p-4 h-auto border-2 border-dashed border-orange-300 hover:bg-orange-50 transition-colors group"
+              onClick={() => setLocation(`/invoices`)}
             >
               <div className="text-center">
                 <FileText className="w-8 h-8 text-orange-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <p className="text-sm font-medium text-gray-800">Generate Invoice</p>
+                <p className="text-sm font-medium text-gray-800">Manage Invoices</p>
+                
               </div>
             </Button>
           </div>

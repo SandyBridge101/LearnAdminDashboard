@@ -17,13 +17,25 @@ interface TrackFormModalProps {
   onSuccess: () => void;
 }
 
+/*
+          <div>
+          <Label htmlFor="imageUrl">Upload Media</Label>
+          <Input
+            id="imageUrl"
+            type="file"
+            accept="image/*,video/*,audio/*"
+            {...form.register("imageUrl")}
+          />
+          </div>
+*/
+
 export function TrackFormModal({ track, onClose, onSuccess }: TrackFormModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEdit = !!track;
 
   const form = useForm<InsertTrack>({
-    resolver: zodResolver(insertTrackSchema),
+    //resolver: zodResolver(insertTrackSchema),
     defaultValues: {
       name: track?.name || "",
       description: track?.description || "",
@@ -59,6 +71,8 @@ export function TrackFormModal({ track, onClose, onSuccess }: TrackFormModalProp
       });
     },
   });
+
+
 
   const onSubmit = (data: InsertTrack) => {
     // Convert technologies from comma-separated string to array
@@ -142,15 +156,16 @@ export function TrackFormModal({ track, onClose, onSuccess }: TrackFormModalProp
               defaultValue={track?.technologies?.join(', ') || ''}
             />
           </div>
+          
 
           <div>
-            <Label htmlFor="imageUrl">Image URL</Label>
-            <Input
-              id="imageUrl"
-              type="url"
-              placeholder="https://example.com/image.jpg"
-              {...form.register("imageUrl")}
-            />
+          <Label htmlFor="image">Image URL</Label>
+          <Input
+            id="imageUrl"
+            type="url"
+            placeholder="https://example.com/image.jpg"
+            {...form.register("imageUrl")}
+          />
           </div>
 
           <div>

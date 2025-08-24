@@ -27,6 +27,7 @@ import {
   Search, 
   Filter, 
   Download,
+  Edit,
   Eye,
   Trash2
 } from "lucide-react";
@@ -40,9 +41,13 @@ export default function Invoices() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: invoices = [], isLoading } = useQuery({
-    queryKey: ["/api/invoices", search, statusFilter === "all" ? undefined : statusFilter],
+  const { data: invoicesRaw = [], isLoading } = useQuery({
+    queryKey: ["/api/invoices", search],
   });
+
+  console.log("invoicesRaw",invoicesRaw);
+
+  const invoices = Array.isArray(invoicesRaw) ? invoicesRaw : [];
 
   const { data: learners = [] } = useQuery({
     queryKey: ["/api/learners"],
@@ -71,13 +76,18 @@ export default function Invoices() {
   });
 
   const handleDeleteInvoice = (id: number, invoiceNumber: string) => {
-    if (confirm(`Are you sure you want to delete ${invoiceNumber}?`)) {
+    if (confirm(`Are you sure you want to delete invoice with id ${id}?`)) {
       deleteInvoiceMutation.mutate(id);
     }
   };
 
   const handleAddInvoice = () => {
     setSelectedInvoice(null);
+    setShowModal(true);
+  };
+
+  const handleEditInvoice = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
     setShowModal(true);
   };
 
@@ -98,7 +108,7 @@ export default function Invoices() {
 
   const getLearnerName = (learnerId: number) => {
     const learner = learners.find((l: any) => l.id === learnerId);
-    return learner ? `${learner.firstName} ${learner.lastName}` : "Unknown Learner";
+    return learner ? `${learner.first_name} ${learner.last_name}` : "Unknown Learner";
   };
 
   const getLearnerEmail = (learnerId: number) => {
@@ -193,28 +203,28 @@ export default function Invoices() {
                 ) : (
                   invoices.map((invoice: Invoice) => (
                     <TableRow key={invoice.id} className="table-hover">
-                      <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
+                      <TableCell className="font-medium">{invoice.id}</TableCell>
                       <TableCell>
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                             <span className="text-blue-600 font-medium text-sm">
-                              {getLearnerName(invoice.learnerId).split(' ').map(n => n[0]).join('')}
+                              {getLearnerName(invoice.learner).split(' ').map(n => n[0]).join('')}
                             </span>
                           </div>
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {getLearnerName(invoice.learnerId)}
+                              {getLearnerName(invoice.learner)}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {getLearnerEmail(invoice.learnerId)}
+                              {getLearnerEmail(invoice.learner)}
                             </div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{getTrackName(invoice.trackId)}</TableCell>
+                      <TableCell>{getTrackName(invoice.track)}</TableCell>
                       <TableCell>${parseFloat(invoice.amount).toFixed(2)}</TableCell>
                       <TableCell>
-                        {invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString() : "N/A"}
+                        {invoice.createdAt ? new Date(invoice.due_date).toLocaleDateString() : "N/A"}
                       </TableCell>
                       <TableCell>{getStatusBadge(invoice.status || "pending")}</TableCell>
                       <TableCell>
@@ -230,8 +240,9 @@ export default function Invoices() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-green-600 hover:text-green-900"
+                            onClick={() => handleEditInvoice(invoice)}
                           >
-                            <Download className="h-4 w-4" />
+                            <Edit className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"

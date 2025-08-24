@@ -37,8 +37,9 @@ export const courses = pgTable("courses", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  trackId: integer("track_id").references(() => tracks.id).notNull(),
+  trackId: text("track_id").references(() => tracks.id).notNull(),
   instructor: text("instructor").notNull(),
+  image: text("image").notNull(),
   duration: text("duration").notNull(),
   students: integer("students").default(0),
   status: text("status").default("active"), // active, draft, archived

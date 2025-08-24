@@ -27,12 +27,16 @@ export default function Tracks() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: tracks = [], isLoading } = useQuery({
+  const { data: tracksRaw = [], isLoading } = useQuery({
     queryKey: ["/api/tracks", search],
   });
 
+  console.log("tracksRaw",tracksRaw);
+
+  const tracks = Array.isArray(tracksRaw) ? tracksRaw : [];
+
   const deleteTrackMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/tracks/${id}`),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/tracks/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tracks"] });
       toast({
@@ -49,7 +53,7 @@ export default function Tracks() {
     },
   });
 
-  const handleDeleteTrack = (id: number, name: string) => {
+  const handleDeleteTrack = (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete "${name}"?`)) {
       deleteTrackMutation.mutate(id);
     }
@@ -158,7 +162,12 @@ export default function Tracks() {
                 <div className="absolute top-4 right-4 bg-white px-2 py-1 rounded-lg text-sm font-medium text-gray-800">
                   ${parseFloat(track.price).toFixed(0)}
                 </div>
-                <div className="h-48 bg-gradient-to-r from-blue-400 via-teal-400 to-green-400"></div>
+                <div className="h-48 bg-gradient-to-r from-blue-400 via-teal-400 to-green-400">
+                  <img
+                    src={track.image}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
               </div>
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">{track.name}</h3>

@@ -42,7 +42,7 @@ export default function Courses() {
   const queryClient = useQueryClient();
 
   const { data: courses = [], isLoading } = useQuery({
-    queryKey: ["/api/courses", search, trackFilter === "all" ? undefined : trackFilter],
+    queryKey: ["/api/courses", search], //queryKey: ["/api/courses", search, trackFilter === "all" ? undefined : trackFilter],
   });
 
   const { data: tracks = [] } = useQuery({
@@ -50,7 +50,7 @@ export default function Courses() {
   });
 
   const deleteCourseMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/courses/${id}`),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/courses/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
       toast({
@@ -67,7 +67,7 @@ export default function Courses() {
     },
   });
 
-  const handleDeleteCourse = (id: number, title: string) => {
+  const handleDeleteCourse = (id: string, title: string) => {
     if (confirm(`Are you sure you want to delete "${title}"?`)) {
       deleteCourseMutation.mutate(id);
     }
@@ -97,7 +97,7 @@ export default function Courses() {
     );
   };
 
-  const getTrackName = (trackId: number) => {
+  const getTrackName = (trackId: string) => {
     const track = tracks.find((t: any) => t.id === trackId);
     return track?.name || "Unknown Track";
   };
@@ -184,10 +184,7 @@ export default function Courses() {
                 <TableRow>
                   <TableHead>Course</TableHead>
                   <TableHead>Track</TableHead>
-                  <TableHead>Instructor</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Students</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Description</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -218,11 +215,8 @@ export default function Courses() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{getTrackName(course.trackId)}</TableCell>
-                      <TableCell>{course.instructor}</TableCell>
-                      <TableCell>{course.duration}</TableCell>
-                      <TableCell>{course.students || 0}</TableCell>
-                      <TableCell>{getStatusBadge(course.status || "active")}</TableCell>
+                      <TableCell>{course.track.name}</TableCell>
+                      <TableCell>{course.description}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Button

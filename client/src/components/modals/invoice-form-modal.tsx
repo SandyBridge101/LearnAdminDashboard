@@ -32,14 +32,14 @@ export function InvoiceFormModal({ invoice, learners, tracks, onClose, onSuccess
   const isEdit = !!invoice;
 
   const form = useForm<InsertInvoice>({
-    resolver: zodResolver(insertInvoiceSchema),
+    //resolver: zodResolver(insertInvoiceSchema),
     defaultValues: {
-      learnerId: invoice?.learnerId || 0,
+      learnerId: invoice?.learnerId || "",
       trackId: invoice?.trackId || null,
       courseId: invoice?.courseId || null,
       amount: invoice?.amount || "",
       status: invoice?.status || "pending",
-      dueDate: invoice?.dueDate ? new Date(invoice.dueDate).toISOString().split('T')[0] : "",
+      dueDate: invoice?.dueDate ? new Date(invoice.dueDate) : null,
       notes: invoice?.notes || "",
     },
   });
@@ -47,8 +47,10 @@ export function InvoiceFormModal({ invoice, learners, tracks, onClose, onSuccess
   const mutation = useMutation({
     mutationFn: (data: InsertInvoice) => {
       if (isEdit) {
+        console.log("running put request for invoice...");
         return apiRequest("PUT", `/api/invoices/${invoice.id}`, data);
       } else {
+        console.log("running post request for invoice...");
         return apiRequest("POST", "/api/invoices", data);
       }
     },
@@ -71,12 +73,17 @@ export function InvoiceFormModal({ invoice, learners, tracks, onClose, onSuccess
 
   const onSubmit = (data: InsertInvoice) => {
     // Convert date string to Date object if provided
+    /*
     const processedData = {
       ...data,
       dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
     };
-    
     mutation.mutate(processedData);
+    */
+    console.log('submitted data',data);
+    mutation.mutate(data);
+    
+    
   };
 
   return (
@@ -95,8 +102,20 @@ export function InvoiceFormModal({ invoice, learners, tracks, onClose, onSuccess
           <div>
             <Label htmlFor="learnerId">Learner</Label>
             <Select
+              
               value={form.watch("learnerId")?.toString()}
-              onValueChange={(value) => form.setValue("learnerId", parseInt(value))}
+              onValueChange={(value) => form.setValue("learnerId", value)}
+
+              /*
+              value={form.watch("learnerId") !== null 
+                ? form.watch("learnerId")?.toString() 
+                : "none"
+              }
+              onValueChange={(value) =>
+                //form.setValue("learnerId", value === "none" ? null : value)
+                form.setValue("learnerId", value === "none" ? null : value)
+              }
+              */
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a learner" />
@@ -104,7 +123,7 @@ export function InvoiceFormModal({ invoice, learners, tracks, onClose, onSuccess
               <SelectContent>
                 {learners.map((learner) => (
                   <SelectItem key={learner.id} value={learner.id.toString()}>
-                    {learner.firstName} {learner.lastName} ({learner.email})
+                    {learner.first_name} {learner.last_name} ({learner.email})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -117,14 +136,24 @@ export function InvoiceFormModal({ invoice, learners, tracks, onClose, onSuccess
           <div>
             <Label htmlFor="trackId">Track (Optional)</Label>
             <Select
+              /*
               value={form.watch("trackId")?.toString() || ""}
               onValueChange={(value) => form.setValue("trackId", value ? parseInt(value) : null)}
+              */
+               value={form.watch("trackId") !== null 
+                ? form.watch("trackId")?.toString() 
+                : "none"
+              }
+              onValueChange={(value) =>
+                form.setValue("trackId", value === "none" ? null : value)
+              }
+
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a track" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No Track</SelectItem>
+                <SelectItem value="none">No Track</SelectItem>
                 {tracks.map((track) => (
                   <SelectItem key={track.id} value={track.id.toString()}>
                     {track.name}
@@ -151,17 +180,23 @@ export function InvoiceFormModal({ invoice, learners, tracks, onClose, onSuccess
           <div>
             <Label htmlFor="status">Status</Label>
             <Select
+              /*
               value={form.watch("status")}
               onValueChange={(value) => form.setValue("status", value)}
-            >
+              */
+               value={form.watch("status") !== null 
+                ? form.watch("status")?.toString() 
+                : "none"
+              }
+              onValueChange={(value) =>
+                form.setValue("status", value === "none" ? "none" : value)
+              }>
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="overdue">Overdue</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
