@@ -176,9 +176,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: email,
         }
       });
-      res.status(200).json({ message: "User Logged In" });
+      res.status(200);
+      
     } catch (error: any) {
       res.status(400).json({ message: error.message });
+      
     }
   });
 
