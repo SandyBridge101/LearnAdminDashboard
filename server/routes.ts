@@ -45,7 +45,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.post("/api/auth/register", async (req, res) => { // /api/auth/register
     try {
-      const validatedData = insertAdminSchema.parse(req.body);
+      
+      // const validatedData = insertAdminSchema.parse(req.body);
       
       // Check if admin already exists
       /*
@@ -53,7 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (existingAdmin) {
         return res.status(400).json({ message: "Admin with this email already exists" });
       }
-      */
+      
      
       const admin = await storage.createAdmin(validatedData);
       
@@ -66,10 +67,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `Your verification code is: ${admin.otpCode}\nThis code expires in 5 minutes.`
       );
       console.log("Mail sent...")
+      */
 
-      res.status(201).json({ 
+    
+     
+      
+      const userdata = {
+        first_name: req.body.firstName,
+        last_name: req.body.lastName,
+        email: req.body.email,
+        password: req.body.password,
+        confirm_password: req.body.password,
+        contact: req.body.phone
+      };
+      
+      /*
+      const userdata = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      confirmPassword: formData.password,
+      contact: formData.contact
+      };*/
+    
+
+
+    const signup_response = await fetch("https://deenaber.pythonanywhere.com/auth/signup/admin/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userdata)
+    });
+
+    console.log(signup_response)
+
+    /*
+    if (!signup_response.ok) {
+      const error = await signup_response.json();
+      console.error("Signup failed:", error);
+      return error;
+    }
+    */
+
+    const result = await signup_response.json();
+    console.log("Signup successful:", result);
+
+    res.status(201).json({ 
         message: "Admin registered successfully. Please check your email for verification code.",
-        email: admin.email
+        email: ""
       });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
